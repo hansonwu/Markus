@@ -269,24 +269,48 @@ class SubmissionsController < ApplicationController
       params[:sort_by] = 'group_name'
     end
     @assignment = Assignment.find(params[:assignment_id])
-    @groupings, @groupings_total = handle_paginate_event(
-      S_TABLE_PARAMS,                                     # the data structure to handle filtering and sorting
-        { :assignment => @assignment,                     # the assignment to filter by
-          :user_id => current_user.id},                   # the submissions accessable by the current user
-      params)                                             # additional parameters that affect things like sorting
+    
+    if params[:search] == nil or params[:search].blank?
+      @groupings, @groupings_total = handle_paginate_event(
+        S_TABLE_PARAMS,                                     # the data structure to handle filtering and sorting
+          { :assignment => @assignment,                     # the assignment to filter by
+            :user_id => current_user.id},                   # the submissions accessable by the current user
+        params)                                             # additional parameters that affect things like sorting
 
-    #Eager load all data only for those groupings that will be displayed
-    sorted_groupings = @groupings
-    @groupings = Grouping.find(:all, :conditions => {:id => sorted_groupings},
-      :include => [:assignment, :group, :grace_period_deductions,
-        {:current_submission_used => :result},
-        {:accepted_student_memberships => :user}])
+      #Eager load all data only for those groupings that will be displayed
+      sorted_groupings = @groupings
+      @groupings = Grouping.find(:all, :conditions => {:id => sorted_groupings},
+        :include => [:assignment, :group, :grace_period_deductions,
+          {:current_submission_used => :result},
+          {:accepted_student_memberships => :user}])
 
-    #re-sort @groupings by the previous order, because eager loading query
-    #messed up the grouping order
-    @groupings = sorted_groupings.map do |sorted_grouping|
-      @groupings.detect do |unsorted_grouping|
-        unsorted_grouping == sorted_grouping
+      #re-sort @groupings by the previous order, because eager loading query
+      #messed up the grouping order
+      @groupings = sorted_groupings.map do |sorted_grouping|
+        @groupings.detect do |unsorted_grouping|
+          unsorted_grouping == sorted_grouping
+        end
+      end
+    else
+      if (current_user.admin?)
+        # Show all of the groupings for this assignment
+        @groupings = Grouping.joins(:student_memberships => :user).where(
+        'users.user_name LIKE ? AND assignment_id = ?',
+        '%' + params[:search] + '%', @assignment.id).uniq
+      else
+        # TA - Show only groupings for this assignment assigned to this TA
+        @groupings = Grouping.joins('
+          LEFT JOIN memberships ta on ta.grouping_id = groupings.id
+          LEFT JOIN memberships s on s.grouping_id = groupings.id
+            LEFT JOIN users students on s.user_id = students.id').where("
+              students.user_name LIKE ?
+              AND ta.user_id = ?
+              AND assignment_id = ?
+              AND s.type = 'StudentMembership'
+              AND ta.type = 'TAMembership'",
+                '%' + params[:search] + '%',
+                current_user.id,
+                @assignment.id).uniq
       end
     end
 
@@ -297,6 +321,7 @@ class SubmissionsController < ApplicationController
     @desc = params[:desc]
     @filter = params[:filter]
     @sort_by = params[:sort_by]
+    @search = params[:search]
   end
 
   def index

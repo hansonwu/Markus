@@ -870,6 +870,14 @@ input#extra_mark_description{
   margin: 5px;
 }
 
+.search_results {
+	display: inline-block;
+	border: 1px solid #E6DB55;
+	padding: 3px 10px;
+	min-width: 350px;
+	text-align: center;
+}
+
 .information{
   border: 1px solid #0047FF;
   padding: 3px 30px;

@@ -1,6 +1,7 @@
   <tr>
     <th>
     </th>
+    <% if @search == nil or @search.blank? %>
     <th class="<%="ap_sorting_by" if (sort_by == 'group_name')%>
                 <%="ap_sorting_by_desc" if (sort_by == 'group_name' && !desc.blank?)%>">
       <%= link_to I18n.t("browse_submissions.group_name"),
@@ -77,6 +78,17 @@
               :sort_by => 'section',
               :desc => (sort_by == 'section' && desc.blank?) %>
     </th>
+    <% end %>
+    <% else %>
+      <th><%= I18n.t("browse_submissions.group_name") %></th>
+      <th><%= I18n.t("browse_submissions.repository") %></th>
+      <th><%= I18n.t("browse_submissions.commit_date") %></th>
+      <th><%= I18n.t("browse_submissions.marking_state") %></th>
+      <th><%= I18n.t("browse_submissions.grace_credits_used") %></th>
+      <th><%= I18n.t("browse_submissions.final_grade") %></th>
+      <% if assignment.section_groups_only %>
+      <th><%= I18n.t("browse_submissions.section") %></th>
+      <% end %>
     <% end %>
     <th>
       <%= I18n.t("browse_submissions.can_begin_grading") %>

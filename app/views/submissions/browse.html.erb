@@ -69,6 +69,24 @@
       </ul>
     </div>
   <% end %>
+  
+  <%= label_tag "search", I18n.t("browse_submissions.search_by_student"), :class => "inline_label" %>
+  <%= text_field_tag "search", params[:search], {:id => "submissionSearch"} %>
+  <% if @search != nil and !@search.blank? %>
+  <div class="search_results">
+    <%=h I18n.t("browse_submissions.search_count", :count => h(@groupings.length)) %>&nbsp;
+    <%= link_to I18n.t("browse_submissions.clear_search"), browse_assignment_submissions_path() %>
+  </div>
+  <% end %>
+  
+  <script type="text/javascript">
+  $('submissionSearch').observe('keypress', function(e) {
+  	var search = e.element().value;
+  	if(e.keyCode == Event.KEY_RETURN && search.length > 0) {
+        top.location.href = "<%= browse_assignment_submissions_path() %>" + '?search=' + search;
+    }
+  });
+  </script>
 
   <div class="clear"></div>
 
@@ -86,6 +104,7 @@
           <% end %>
         </div>
       <% end %>
+      <% if @search == nil or @search.blank? %>
       <div class="ap_filters" id="ap_filters_1">
         <%= render  :partial => 'submissions_table_filters',
                     :locals => {
@@ -122,6 +141,7 @@
         :locals => {:page_items => @groupings.size,
                     :total_items => @groupings_total} %>
     </div>
+    <% end %>
 
     <table>
       <thead id="submissions_table_head">
@@ -134,7 +154,6 @@
                       :sort_by => @sort_by,
                       :desc => @desc } %>
       </thead>
-
       <%= render  :partial => 'submissions_table_body',
                   :locals => {
                     :groupings => @groupings,
@@ -152,7 +171,7 @@
       </tfoot>
     </table>
 
-
+    <% if @search == nil or @search.blank? %>
     <div class="ap_nav_box">
       <div class="ap_page_links" id="ap_page_links_2">
         <%= render  :partial => 'ajax_paginate/initial_paginate_links',
@@ -165,10 +184,11 @@
                       :filter => @filter,
                       :sort_by => @sort_by,
                       :desc => @desc } %>
-      </div>
+      </div>      
       <div id="ap_selector">
         <%= render :partial => 'ajax_paginate/selector' %>
       </div>
+      <% end %>
 
       <div class="clear"></div>
 
@@ -180,6 +200,7 @@
                                 :name => "unrelease_results" %>
         <% end %>
       </div>
+      <% if @search == nil or @search.blank? %>
       <div class="ap_filters" id="ap_filters_2">
         <%= render  :partial => 'submissions_table_filters',
                     :locals => {
@@ -192,6 +213,7 @@
                       :per_page => @per_page,
                       :per_pages => @per_pages } %>
       </div>
+      <% end %>
       <div class="clear"></div>
     </div>
   </form>
