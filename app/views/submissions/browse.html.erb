@@ -69,7 +69,7 @@
       </ul>
     </div>
   <% end %>
-  
+
   <%= label_tag "search", I18n.t("browse_submissions.search_by_student"), :class => "inline_label" %>
   <%= text_field_tag "search", params[:search], {:id => "submissionSearch"} %>
   <% if @search != nil and !@search.blank? %>
@@ -78,12 +78,12 @@
     <%= link_to I18n.t("browse_submissions.clear_search"), browse_assignment_submissions_path() %>
   </div>
   <% end %>
-  
+
   <script type="text/javascript">
   $('submissionSearch').observe('keypress', function(e) {
-  	var search = e.element().value;
-  	if(e.keyCode == Event.KEY_RETURN && search.length > 0) {
-        top.location.href = "<%= browse_assignment_submissions_path() %>" + '?search=' + search;
+    var search = e.element().value;
+    if(e.keyCode == Event.KEY_RETURN && search.length > 0) {
+      top.location.href = "<%= browse_assignment_submissions_path() %>" + '?search=' + search;
     }
   });
   </script>
@@ -184,7 +184,7 @@
                       :filter => @filter,
                       :sort_by => @sort_by,
                       :desc => @desc } %>
-      </div>      
+      </div>
       <div id="ap_selector">
         <%= render :partial => 'ajax_paginate/selector' %>
       </div>
